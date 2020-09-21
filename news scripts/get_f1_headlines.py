@@ -7,7 +7,7 @@ import random
 URL = "https://www.formula1.com/en/latest/all.news.html"
 PATH = "/Users/user/Google Drive/2020/Custom-News-bot/chromedriver"
 options = webdriver.ChromeOptions()
-#options.add_argument("headless")
+options.add_argument("headless")
 
 def todays_headlines():
     browser = webdriver.Chrome(PATH, options = options)
