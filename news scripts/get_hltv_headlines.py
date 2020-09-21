@@ -17,11 +17,11 @@ def todays_headlines():
     except TimeoutException:
         webdriver.ActionChains(browser).send_keys(Keys.ESCAPE).perform()
 
-    randSleepTime = random.randint(0, 5)
+    randSleepTime = random.randint(0, 3)
     print("Sleeping for " + str(randSleepTime))
     time.sleep(randSleepTime)
 
-    newsElems = browser.find_elements_by_css_selector("body > div.bgPadding > div > div.colCon > div.contentCol > div.index > div:nth-child(6) > a")
+    newsElems = browser.find_elements_by_css_selector("body > div.bgPadding > div > div.colCon > div.contentCol > div.index > div:nth-child(5) > a")
     print(len(newsElems))
 
     for headline in newsElems:
