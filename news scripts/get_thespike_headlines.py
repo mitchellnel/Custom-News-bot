@@ -21,11 +21,11 @@ def todays_headlines():
     print("Sleeping for " + str(randSleepTime))
     time.sleep(randSleepTime)
 
-    todays_news_box = browser.find_elements_by_css_selector("#news-module > div:nth-child(2) > div")
+    todays_news_box = browser.find_elements_by_css_selector("#news-module > ul:nth-child(1) > li")
     print(len(todays_news_box))
 
     for headline in todays_news_box:
-        if headline.get_attribute("class") != "item ":
+        if headline.get_attribute("class") != "item element-trim-button ":
             continue
 
         news_info_elem = headline.find_element_by_tag_name("a")
