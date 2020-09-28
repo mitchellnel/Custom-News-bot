@@ -9,7 +9,7 @@ PATH = "/Users/user/Google Drive/2020/Custom-News-bot/chromedriver"
 options = webdriver.ChromeOptions()
 options.add_argument("headless")
 
-def todays_headlines():
+def headlines():
     browser = webdriver.Chrome(PATH, options = options)
     try:
         browser.set_page_load_timeout(8)
@@ -21,7 +21,10 @@ def todays_headlines():
     print("Sleeping for " + str(randSleepTime))
     time.sleep(randSleepTime)
 
+    # todays' news seems to be either div:nth-child(5) or div:nth-child(6)
     newsElems = browser.find_elements_by_css_selector("body > div.bgPadding > div > div.colCon > div.contentCol > div.index > div:nth-child(5) > a")
+    if len(newsElems) == 0:
+        newsElems = browser.find_elements_by_css_selector("body > div.bgPadding > div > div.colCon > div.contentCol > div.index > div:nth-child(6) > a")
     print(len(newsElems))
 
     for headline in newsElems:
@@ -33,4 +36,4 @@ def todays_headlines():
 
     browser.quit()
 
-todays_headlines()
+headlines()

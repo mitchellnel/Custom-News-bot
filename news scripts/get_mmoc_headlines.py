@@ -9,7 +9,7 @@ PATH = "/Users/user/Google Drive/2020/Custom-News-bot/chromedriver"
 options = webdriver.ChromeOptions()
 options.add_argument("headless")
 
-def todays_headlines():
+def headlines():
     browser = webdriver.Chrome(PATH, options = options)
     try:
         browser.set_page_load_timeout(8)
@@ -31,4 +31,4 @@ def todays_headlines():
 
     browser.quit()
 
-todays_headlines()
+headlines()
