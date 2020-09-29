@@ -1,7 +1,7 @@
 import logging
 import telegram
 from telegram.ext import Updater
-from telegram.ext import CommandHandler, MessageHandler, CallbackQueryHandler
+from telegram.ext import CommandHandler, MessageHandler, CallbackQueryHandler, ConversationHandler
 from telegram.ext import Filters
 from telegram.ext import InlineQueryHandler
 from telegram.ext.dispatcher import run_async # rm
@@ -19,29 +19,39 @@ logging.basicConfig(format = '%(asctime)s - %(name)s - %(levelname)s - %(message
 logger = logging.getLogger(__name__)
 
 def main():
-    # get token from .txt file
+    # Get token from .txt file
     token_file = open("BOT_TOKEN.txt", 'r')
     bot_token = token_file.readline().rstrip()
     token_file.close()
 
+    # Create Updater, pass bot's token, and get dispatcher
     updater = Updater(token = bot_token, use_context = True)
     dispatcher = updater.dispatcher
 
-    # intialise and add "Handlers"
-    # start_handler to handle first-time start sequence
-    start_handler = CommandHandler("start", utility.start)
-    dispatcher.add_handler(start_handler)
+    # Register handlers
+    # Setup conversation handler with states:
+    #   - utility.FIRST_SITE_SELECTED
+    #   - utility.CONTINUE_SELECTING_SITES
+    #   - utility.END_SITE_SELECTION
+    conv_handler = ConversationHandler(
+        entry_points = [CommandHandler("start", utility.start)],
 
-    # site_selection_handler to handle user input from site selection buttons
-    site_selection_handler = CallbackQueryHandler(utility.site_selection_button)
-    dispatcher.add_handler(site_selection_handler)
+        states = {
+            utility.SITE_BUTTON_PRESSED: [CallbackQueryHandler(utility.select_site)],
+            utility.FINISHED_SELECTING_SITES: [CallbackQueryHandler(utility.select_blast_time)]
+        },
 
-    # start the bot
+        fallbacks = [CommandHandler("start", utility.start)]
+    )
+    # Add ConversationgHandler to dispatcher to handle start-up sequence
+    dispatcher.add_handler(conv_handler)
+
+    # Start the bot
     updater.start_polling()
 
     logging.log(level=logging.INFO, msg = "Bot is live and ready to roll.")
 
-    # run the bot until the user presses ctrl-C or the process receives SIG-INT/TERM/ABRT
+    # Run the bot until the user presses ctrl-C or the process receives SIG-INT/TERM/ABRT
     updater.idle()
 
 if __name__ == "__main__":
