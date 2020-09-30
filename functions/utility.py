@@ -19,9 +19,6 @@ FINISHED_SELECTING_SITES = "FINISHED_SELECTING_SITES"
 
 SELECTED_BLAST_TIME = "SELECTED_BLAST_TIME"
 
-global user_sites
-user_sites = dict()
-
 @run_async
 def start(update, context):
     """ /start sequence:
@@ -36,7 +33,7 @@ def start(update, context):
     logger.info("User %s started the conversation with the bot.", user.first_name)
 
     # Initialise site list for current chat (using chat_id as key)
-    user_sites[chat_id] = list()
+    context.user_data["site_list"] = list()
 
     # Welcome user and state purpose
     context.bot.send_message(chat_id = chat_id, text = "Hello there, " + user.first_name + "! I'm the CustomNews_bot, "
@@ -88,7 +85,7 @@ def select_site(update, context):
 
     reply_markup = InlineKeyboardMarkup(keyboard)
 
-    if query.data in user_sites[chat_id]:
+    if query.data in context.user_data["site_list"]:
         # Send a response to the user to echo their selection
         # Then send message with text and appended InlineKeyboard for user to keep selecting sites
         query.edit_message_text(text = "You've already subscribed to the {} news feed.\n\nYou can keep selecting more"
@@ -102,7 +99,7 @@ def select_site(update, context):
         query.edit_message_text(text = "Okay, you don't want to select anymore sites.")
 
         context.bot.send_message(chat_id = chat_id,
-                                 text="Your currently subscribed sites are:\n" + get_user_sites_in_bullets(chat_id))
+                                 text="Your currently subscribed sites are:\n" + get_user_sites_in_bullets(context))
         context.bot.send_message(chat_id = chat_id,
                                  text = "In the future, if you want to edit your site subscriptions, you can use the"
                                       " /changesites command.")
@@ -110,7 +107,7 @@ def select_site(update, context):
         return FINISHED_SELECTING_SITES
     else:
         # Add the selected site
-        user_sites[chat_id].append(query.data)
+        context.user_data["site_list"].append(query.data)
         # Send a response to the user to echo their selection
         # Then send message with text and appended InlineKeyboard for user to keep selecting sites
         query.edit_message_text(text = "Great! You've just subscribed to the {} news feed.\n\nYou can keep selecting more"
@@ -121,10 +118,10 @@ def select_site(update, context):
         return SITE_BUTTON_PRESSED
 
 
-def get_user_sites_in_bullets(chat_id):
+def get_user_sites_in_bullets(context):
     sites = ""
 
-    for curr_site in user_sites[chat_id]:
+    for curr_site in context.user_data["site_list"]:
         sites = sites + "  - " + curr_site + "\n"
 
     return(sites)
