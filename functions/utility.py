@@ -180,3 +180,13 @@ def select_blast_time(update, context):
     context.user_data["blast_time"] = time_obj
     update.message.reply_text("Okay! You've chosen to receive your \"news blasts\" at " + str(time_obj.hour) + ":" +
                               str(time_obj.minute) + " everyday.")
+
+    context.bot.send_message(chat_id=chat_id,
+                             text="Alright! I now have all the information I need to send you your daily"
+                                  " \"news blasts\".")
+    context.bot.send_message(chat_id=chat_id,
+                             text="You can also manually request the latest headlines from your subscribed sites using"
+                                  " their respective \"pull\" commands. To see these again, use the /mysites command.")
+    context.bot.send_message(chat_id=chat_id,
+                             text="If you need further command help, use /help to see a list of available commands and"
+                                  " their functions.")
