@@ -10,8 +10,8 @@ import datetime
 import logging
 
 # Enable logging
-logging.basicConfig(format = '%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-                    level = logging.INFO)
+logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+                    level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # Stages
@@ -45,16 +45,15 @@ def start(update, context):
     context.user_data["site_list"] = list()
 
     # Welcome user and state purpose
-    context.bot.send_message(chat_id = chat_id, text = "Hello there, " + user.first_name + "! I'm the CustomNews_bot, "
-                                                                                           "here to provide you with "
-                                                                                           "the latest news from some "
-                                                                                           "of your favourite gaming "
-                                                                                           "and sport sites!")
+    context.bot.send_message(chat_id=chat_id,
+                             text="Hello there, " + user.first_name + "! I'm the CustomNews_bot, here to provide you "
+                                                                      " with the latest news from some of your"
+                                                                      " favourite gaming and sport sites!")
 
     # Get user to select first site to subscribe to
-    context.bot.send_message(chat_id = chat_id, text = "In order to provide you with daily news updates from your "
-                                                       "favourite sites, I want to know which websites you want to "
-                                                       "\"subscribe\" to.")
+    context.bot.send_message(chat_id=chat_id,
+                             text="In order to provide you with daily news updates from your favourite sites, I want"
+                                    " to know which websites you want to \"subscribe\" to.")
 
     # Create inline keyboard
     keyboard = [[InlineKeyboardButton("HLTV", callback_data = "HLTV.org"),
@@ -66,7 +65,7 @@ def start(update, context):
     reply_markup = InlineKeyboardMarkup(keyboard)
 
     # Send message with text and appended InlineKeyboard
-    update.message.reply_text("User the buttons below to tell me which sites you want news updates from:",
+    update.message.reply_text("Use the buttons below to tell me which sites you want news updates from:",
                               reply_markup = reply_markup)
 
     # Tell ConversationHandler that we're in state "FIRST_SITE_SELECTED" now
@@ -99,10 +98,10 @@ def select_site(update, context):
         logger.info("User {0} ({1}) tried to add a duplicate site to their site list.".format(user.first_name, chat_id))
         # Send a response to the user to echo their selection
         # Then send message with text and appended InlineKeyboard for user to keep selecting sites
-        query.edit_message_text(text = "You've already subscribed to the {} news feed.\n\nYou can keep selecting more"
+        query.edit_message_text(text="You've already subscribed to the {} news feed.\n\nYou can keep selecting more"
                                        " sites to subscribe to! Tap on the \"Stop selecting sites\" button when you're"
                                        " done.".format(query.data),
-                                reply_markup = reply_markup)
+                                reply_markup=reply_markup)
 
         return SITE_BUTTON_PRESSED
     elif query.data == "$stop_site_selection":
@@ -131,10 +130,10 @@ def select_site(update, context):
         logger.info("User {0} ({1}) has added {2} to their site list,".format(user.first_name, chat_id, query.data))
         # Send a response to the user to echo their selection
         # Then send message with text and appended InlineKeyboard for user to keep selecting sites
-        query.edit_message_text(text = "Great! You've just subscribed to the {} news feed.\n\nYou can keep selecting more"
+        query.edit_message_text(text="Great! You've just subscribed to the {} news feed.\n\nYou can keep selecting more"
                                        " sites to subscribe to! Tap on the \"Stop selecting sites\" button when you're"
                                        " done.".format(query.data),
-                                reply_markup = reply_markup)
+                                reply_markup=reply_markup)
 
         return SITE_BUTTON_PRESSED
 

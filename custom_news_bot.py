@@ -8,7 +8,7 @@ from telegram.ext.dispatcher import run_async # rm
 import schedule # rm
 from selenium import webdriver # rm
 
-import functions.utility as utility
+import functions.Start_Sequence as StartSeq
 import functions.hltv as hltv
 import functions.formula1 as f1
 import functions.thespike as thespike
@@ -34,15 +34,15 @@ def main():
     #   - utility.CONTINUE_SELECTING_SITES
     #   - utility.END_SITE_SELECTION
     conv_handler = ConversationHandler(
-        entry_points = [CommandHandler("start", utility.start)],
+        entry_points = [CommandHandler("start", StartSeq.start)],
 
         states = {
-            utility.SITE_BUTTON_PRESSED: [CallbackQueryHandler(utility.select_site)],
-            utility.FINISHED_SELECTING_SITES: [MessageHandler(Filters.text & ~Filters.command, utility.select_blast_time)],
-            utility.INVALID_BLAST_TIME: [MessageHandler(Filters.text & ~Filters.command, utility.select_blast_time)]
+            StartSeq.SITE_BUTTON_PRESSED: [CallbackQueryHandler(StartSeq.select_site)],
+            StartSeq.FINISHED_SELECTING_SITES: [MessageHandler(Filters.text & ~Filters.command, StartSeq.select_blast_time)],
+            StartSeq.INVALID_BLAST_TIME: [MessageHandler(Filters.text & ~Filters.command, StartSeq.select_blast_time)]
         },
 
-        fallbacks = [CommandHandler("start", utility.start)]
+        fallbacks = [CommandHandler("start", StartSeq.start)]
     )
     # Add ConversationHandler to dispatcher to handle start-up sequence
     dispatcher.add_handler(conv_handler)
