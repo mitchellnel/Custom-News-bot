@@ -39,7 +39,7 @@ def start(update, context):
 
     # Get user that sent /start and log name
     user = update.message.from_user
-    logger.info("User %s started the conversation with the bot.", user.first_name)
+    logger.info("User {0} ({1}) started the conversation with the bot.".format(user.first_name, chat_id))
 
     # Initialise site list for current chat (using chat_id as key)
     context.user_data["site_list"] = list()
@@ -78,6 +78,7 @@ def select_site(update, context):
         then show a new choice of buttons to continue selecting sites
     """
     chat_id = update.effective_chat.id
+    user = update.effective_user
 
     # Get data from the query
     query = update.callback_query
@@ -95,6 +96,7 @@ def select_site(update, context):
     reply_markup = InlineKeyboardMarkup(keyboard)
 
     if query.data in context.user_data["site_list"]:
+        logger.info("User {0} ({1}) tried to add a duplicate site to their site list.".format(user.first_name, chat_id))
         # Send a response to the user to echo their selection
         # Then send message with text and appended InlineKeyboard for user to keep selecting sites
         query.edit_message_text(text = "You've already subscribed to the {} news feed.\n\nYou can keep selecting more"
@@ -104,6 +106,8 @@ def select_site(update, context):
 
         return SITE_BUTTON_PRESSED
     elif query.data == "$stop_site_selection":
+        logger.info("User {0} ({1}) has stopped selecting sites to add to their site list.".format(user.first_name,
+                                                                                                   chat_id))
         # Send a response to the user to echo their selection
         #   and then ask the user to input a time for their
         #   daily "news blast"
@@ -124,6 +128,7 @@ def select_site(update, context):
     else:
         # Add the selected site
         context.user_data["site_list"].append(query.data)
+        logger.info("User {0} ({1}) has added {2} to their site list,".format(user.first_name, chat_id, query.data))
         # Send a response to the user to echo their selection
         # Then send message with text and appended InlineKeyboard for user to keep selecting sites
         query.edit_message_text(text = "Great! You've just subscribed to the {} news feed.\n\nYou can keep selecting more"
@@ -149,10 +154,13 @@ def select_blast_time(update, context):
         want their daily news blast to be sent
     """
     chat_id = update.effective_chat.id
+    user = update.effective_user
 
     # Get the message the user sent
     time_str = update.message.text
     time = int(time_str)
+
+    logger.info("User {0} ({1}) input time {2} to the bot.".format(user.first_name, chat_id, time_str))
 
     # Get hours from time
     hrs = int(time / 100)
@@ -166,8 +174,9 @@ def select_blast_time(update, context):
         time_obj = datetime.time(hrs, mins, 0)
         validTime = True
     except:
-        logger.critical("User %s did not input a valid time. Prompting them for another time...",
-                        update.message.from_user.first_name)
+        logger.critical("User {0} ({1}) did not input a valid time ({2}). Prompting them for another time...".format(user.first_name,
+                                                                                                                     chat_id,
+                                                                                                                     time_str))
 
     # If the user input wasn't valid, make them input another time
     if not validTime:
@@ -190,3 +199,5 @@ def select_blast_time(update, context):
     context.bot.send_message(chat_id=chat_id,
                              text="If you need further command help, use /help to see a list of available commands and"
                                   " their functions.")
+
+    logger.info("User {0} ({1}) has finished the start-up sequence.".format(user.first_name, chat_id))
