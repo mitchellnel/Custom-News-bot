@@ -5,8 +5,9 @@ from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from telegram import ChatAction
 from telegram.ext import CallbackQueryHandler
 
+import datetime
+
 import logging
-import threading
 
 # Enable logging
 logging.basicConfig(format = '%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -17,7 +18,15 @@ logger = logging.getLogger(__name__)
 SITE_BUTTON_PRESSED = "SITE_BUTTON_PRESSED"
 FINISHED_SELECTING_SITES = "FINISHED_SELECTING_SITES"
 
-SELECTED_BLAST_TIME = "SELECTED_BLAST_TIME"
+INVALID_BLAST_TIME = "INVALID_BLAST_TIME"
+
+# Commands for pulling headlines from sites
+SITE_NEWS_COMMANDS = {
+    "HLTV.org": "/hltv",
+    "THESPIKE.GG": "/thespike",
+    "F1.com": "/f1",
+    "MMO-Champion.org": "/mmoc"
+}
 
 @run_async
 def start(update, context):
@@ -90,19 +99,26 @@ def select_site(update, context):
         # Then send message with text and appended InlineKeyboard for user to keep selecting sites
         query.edit_message_text(text = "You've already subscribed to the {} news feed.\n\nYou can keep selecting more"
                                        " sites to subscribe to! Tap on the \"Stop selecting sites\" button when you're"
-                                   " done.".format(query.data),
+                                       " done.".format(query.data),
                                 reply_markup = reply_markup)
 
         return SITE_BUTTON_PRESSED
     elif query.data == "$stop_site_selection":
         # Send a response to the user to echo their selection
-        query.edit_message_text(text = "Okay, you don't want to select anymore sites.")
-
-        context.bot.send_message(chat_id = chat_id,
-                                 text="Your currently subscribed sites are:\n" + get_user_sites_in_bullets(context))
-        context.bot.send_message(chat_id = chat_id,
-                                 text = "In the future, if you want to edit your site subscriptions, you can use the"
-                                      " /changesites command.")
+        #   and then ask the user to input a time for their
+        #   daily "news blast"
+        query.edit_message_text(text="Okay, you don't want to select anymore sites.\n\n"
+                                     "Your currently subscribed sites (and the commands to pull their news headlines)"
+                                     " are:\n" + get_user_sites_in_bullets_with_commands(context) +  "\n"
+                                                                                                     
+                                     "In the future, if you want to edit your site subscriptions, you can use the"
+                                     " /changesites command.\n\n"
+                                                                                                     
+                                     "Now we can continue and select your daily \"news blast\" time!\n\n"
+                                                                                                     
+                                     "Please send me a message of the time you would like to have your daily \"news"
+                                     " blast\" (for 9am, type 0900 or 900; for 1:25pm, type 1300; for 12am, type 0000"
+                                     " or 0)")
 
         return FINISHED_SELECTING_SITES
     else:
@@ -118,16 +134,49 @@ def select_site(update, context):
         return SITE_BUTTON_PRESSED
 
 
-def get_user_sites_in_bullets(context):
+def get_user_sites_in_bullets_with_commands(context):
     sites = ""
 
     for curr_site in context.user_data["site_list"]:
-        sites = sites + "  - " + curr_site + "\n"
+        sites = sites + "  - " + curr_site + " (" + SITE_NEWS_COMMANDS[curr_site] + ")" +"\n"
 
     return(sites)
 
 
 def select_blast_time(update, context):
-    # TODO: Implement function to select the daily "news blast" time
-    context.bot.send_message(update.effective_chat.id, "This hasn't been implemented yet...")
+    """
+        Take the message the user sent and find out what time they
+        want their daily news blast to be sent
+    """
+    chat_id = update.effective_chat.id
 
+    # Get the message the user sent
+    time_str = update.message.text
+    time = int(time_str)
+
+    # Get hours from time
+    hrs = int(time / 100)
+    # Get mins from time
+    mins = time % 100
+
+    validTime = False
+
+    # Check if the user passed a valid time by using a try-except
+    try:
+        time_obj = datetime.time(hrs, mins, 0)
+        validTime = True
+    except:
+        logger.critical("User %s did not input a valid time. Prompting them for another time...",
+                        update.message.from_user.first_name)
+
+    # If the user input wasn't valid, make them input another time
+    if not validTime:
+        context.bot.send_message(chat_id=chat_id, text="That's not a valid time. Please enter a valid time"
+                                                       " (for 9am, type 0900 or 900; for 1:25pm, type 1325; for 12am,"
+                                                       " type 0000 or 0")
+        return INVALID_BLAST_TIME
+
+    # If the user input was valid, store their "blast" time in user_data
+    context.user_data["blast_time"] = time_obj
+    update.message.reply_text("Okay! You've chosen to receive your \"news blasts\" at " + str(time_obj.hour) + ":" +
+                              str(time_obj.minute) + " everyday.")
