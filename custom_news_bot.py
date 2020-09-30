@@ -38,12 +38,13 @@ def main():
 
         states = {
             utility.SITE_BUTTON_PRESSED: [CallbackQueryHandler(utility.select_site)],
-            utility.FINISHED_SELECTING_SITES: [CallbackQueryHandler(utility.select_blast_time)]
+            utility.FINISHED_SELECTING_SITES: [MessageHandler(Filters.text & ~Filters.command, utility.select_blast_time)],
+            utility.INVALID_BLAST_TIME: [MessageHandler(Filters.text & ~Filters.command, utility.select_blast_time)]
         },
 
         fallbacks = [CommandHandler("start", utility.start)]
     )
-    # Add ConversationgHandler to dispatcher to handle start-up sequence
+    # Add ConversationHandler to dispatcher to handle start-up sequence
     dispatcher.add_handler(conv_handler)
 
     # Start the bot
