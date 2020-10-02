@@ -1,6 +1,6 @@
 # Custom-News-bot
 
-## telegram.me/Custom-News-bot
+### [telegram.me/CustomNews_bot](https://telegram.me/CustomNews_bot)
 
 ### To-do:
 - [ ] Implement help function (and continue adding function descriptions to this when necessary)
